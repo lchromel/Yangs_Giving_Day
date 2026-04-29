@@ -25,6 +25,23 @@ npm install
 npm start
 ```
 
+## Railway
+
+If the GitHub repository contains this project inside a subfolder, set Railway's Root Directory to:
+
+```bash
+Yangs_Giving_Day
+```
+
+Set these variables in Railway:
+
+```bash
+TELEGRAM_BOT_TOKEN=your_bot_token
+MAX_WISH_LENGTH=45
+```
+
+Railway can use the default start command from `package.json`: `npm start`.
+
 ## Commands
 
 - `/start` starts a new postcard flow
@@ -35,4 +52,5 @@ npm start
 - The bot uses Telegram long polling and does not need an external Telegram SDK.
 - User state is stored in memory, which is enough for a simple prototype.
 - Raw Figma SVG assets are stored in `assets/raw/` and are rendered directly with `sharp`.
+- Fonts used for rendering are bundled in `assets/fonts/`, so the bot does not depend on local macOS font paths.
 - `npm run render:test` generates local postcard previews and the full 3x3 selection sheet in `output/`.

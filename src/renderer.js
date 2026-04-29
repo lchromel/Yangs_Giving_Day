@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 
 import sharp from "sharp";
 
+import { ROOT_DIR } from "./config.js";
 import {
   CANVAS_SIZE,
   CARD_RADIUS,
@@ -18,15 +18,23 @@ import {
   TEXT_LINE_HEIGHT,
 } from "./layouts.js";
 
-const TEXT_FONT_PATH =
-  "/Users/d-vershinin/Yandex.Disk.localized/Yango/New Yango Fonts 3/Yango Group Text/TTF/YangoGroupText-Regular.ttf";
-const PREVIEW_LABEL_FONT_PATH =
-  "/Library/Fonts/YangoHeadline-BlackItalic.ttf";
-const TEXT_FONT_FILE_URL = pathToFileURL(TEXT_FONT_PATH).href;
-const PREVIEW_LABEL_FONT_FILE_URL = pathToFileURL(PREVIEW_LABEL_FONT_PATH).href;
+const TEXT_FONT_PATH = path.join(ROOT_DIR, "assets", "fonts", "YangoGroupText-Regular.ttf");
+const PREVIEW_LABEL_FONT_PATH = path.join(
+  ROOT_DIR,
+  "assets",
+  "fonts",
+  "YangoHeadline-BlackItalic.ttf",
+);
+const TEXT_FONT_DATA_URL = fontDataUrl(TEXT_FONT_PATH);
+const PREVIEW_LABEL_FONT_DATA_URL = fontDataUrl(PREVIEW_LABEL_FONT_PATH);
 const FONT_FAMILY = "'Yango Group Text', 'Yango Text', 'Yandex Sans Text', 'SF Pro Display', sans-serif";
 const PREVIEW_LABEL_FONT_FAMILY = "'Yango Headline', 'Helvetica Neue', sans-serif";
 const TEXT_MAX_CHARS_PER_LINE = 28;
+
+function fontDataUrl(fontPath) {
+  const font = fs.readFileSync(fontPath).toString("base64");
+  return `data:font/ttf;base64,${font}`;
+}
 
 function escapeXml(text) {
   return text
@@ -78,7 +86,7 @@ function buildTextOverlay(text, color, textBox) {
       <style>
         @font-face {
           font-family: 'Yango Group Text';
-          src: url('${TEXT_FONT_FILE_URL}') format('truetype');
+          src: url('${TEXT_FONT_DATA_URL}') format('truetype');
           font-weight: 400;
           font-style: normal;
         }
@@ -148,7 +156,7 @@ function buildPreviewOverlay() {
       <style>
         @font-face {
           font-family: 'Yango Headline';
-          src: url('${PREVIEW_LABEL_FONT_FILE_URL}') format('truetype');
+          src: url('${PREVIEW_LABEL_FONT_DATA_URL}') format('truetype');
           font-weight: 900;
           font-style: normal;
         }

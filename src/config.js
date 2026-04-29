@@ -52,7 +52,7 @@ export function loadSettings({ requireToken = true } = {}) {
 
   const telegramBotToken = read("TELEGRAM_BOT_TOKEN");
   if (requireToken && !telegramBotToken) {
-    throw new Error("TELEGRAM_BOT_TOKEN is missing. Add it to .env or ~/Desktop/tokens.txt before запуск.");
+    throw new Error("TELEGRAM_BOT_TOKEN is missing. Add it to Railway variables, .env, or ~/Desktop/tokens.txt.");
   }
 
   return {

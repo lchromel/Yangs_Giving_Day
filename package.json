@@ -7,6 +7,9 @@
     "start": "node src/bot.js",
     "render:test": "node src/render-test.js"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "sharp": "^0.34.5"
   }
