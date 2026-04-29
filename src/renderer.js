@@ -1,9 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import sharp from "sharp";
-
 import { ROOT_DIR } from "./config.js";
+import { configureFontEnvironment } from "./fontconfig.js";
 import {
   CANVAS_SIZE,
   CARD_RADIUS,
@@ -17,6 +16,10 @@ import {
   TEXT_FONT_SIZE,
   TEXT_LINE_HEIGHT,
 } from "./layouts.js";
+
+configureFontEnvironment();
+
+const { default: sharp } = await import("sharp");
 
 const TEXT_FONT_PATH = path.join(ROOT_DIR, "assets", "fonts", "YangoGroupText-Regular.ttf");
 const PREVIEW_LABEL_FONT_PATH = path.join(
