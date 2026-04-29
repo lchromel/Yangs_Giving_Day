@@ -1,0 +1,13 @@
+{
+  "name": "telegram-postcard-bot",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node src/bot.js",
+    "render:test": "node src/render-test.js"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5"
+  }
+}

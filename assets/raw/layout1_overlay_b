@@ -1,0 +1,29 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 1898.66 1465.48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Ellipse 33707" filter="url(#filter0_fgn_0_1461)">
+<path d="M1498.66 657.107C1498.66 817.509 1216.96 1065.48 926.293 1065.48C635.629 1065.48 400 935.446 400 775.044C400 614.642 516.363 39.3305 1121.22 738.138C1411.88 738.138 1498.66 496.705 1498.66 657.107Z" fill="var(--fill-0, #3B201A)"/>
+</g>
+<defs>
+<filter id="filter0_fgn_0_1461" x="0" y="-6.08629e-06" width="1898.66" height="1465.48" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="200" result="effect1_foregroundBlur_0_1461"/>
+<feTurbulence type="fractalNoise" baseFrequency="0.1428571492433548 0.1428571492433548" numOctaves="3" seed="2135" />
+<feDisplacementMap in="effect1_foregroundBlur_0_1461" scale="140" xChannelSelector="R" yChannelSelector="G" result="displacedImage" width="100%" height="100%" />
+<feMerge result="effect2_texture_0_1461">
+<feMergeNode in="displacedImage"/>
+</feMerge>
+<feTurbulence type="fractalNoise" baseFrequency="1 1" stitchTiles="stitch" numOctaves="3" result="noise" seed="8884" />
+<feColorMatrix in="noise" type="luminanceToAlpha" result="alphaNoise" />
+<feComponentTransfer in="alphaNoise" result="coloredNoise1">
+<feFuncA type="discrete" tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "/>
+</feComponentTransfer>
+<feComposite operator="in" in2="effect2_texture_0_1461" in="coloredNoise1" result="noise1Clipped" />
+<feFlood flood-color="rgba(0, 0, 0, 0.25)" result="color1Flood" />
+<feComposite operator="in" in2="noise1Clipped" in="color1Flood" result="color1" />
+<feMerge result="effect3_noise_0_1461">
+<feMergeNode in="effect2_texture_0_1461" />
+<feMergeNode in="color1" />
+</feMerge>
+</filter>
+</defs>
+</svg>
