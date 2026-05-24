@@ -68,7 +68,7 @@ export const LAYOUTS = {
     textColor: "#ffffff",
     logo: raw("layout_01_logo"),
     overlays: [
-      { input: raw("layout_01_overlay"), left: 357, top: 372, width: 285, height: 256 },
+      { input: raw("layout_01_overlay"), left: 343, top: 359, width: 314, height: 282, opacity: 0.5 },
     ],
   }),
   "02": fullBleedLayout({
@@ -78,7 +78,7 @@ export const LAYOUTS = {
     textColor: "#ffffff",
     logo: raw("layout_02_logo"),
     overlays: [
-      { input: raw("layout_02_overlay"), left: 371, top: 371, width: 275, height: 242 },
+      { input: raw("layout_02_overlay"), left: 357, top: 359, width: 303, height: 266, opacity: 0.5 },
     ],
   }),
   "03": fullBleedLayout({
@@ -88,7 +88,7 @@ export const LAYOUTS = {
     textColor: "#ffffff",
     logo: raw("layout_03_logo"),
     overlays: [
-      { input: raw("layout_03_overlay"), left: 358, top: 358, width: 283, height: 283 },
+      { input: raw("layout_03_overlay"), left: 344, top: 344, width: 311, height: 311, opacity: 0.5 },
     ],
   }),
   "04": framedLayout({
@@ -98,7 +98,7 @@ export const LAYOUTS = {
     textColor: "#dd2825",
     logo: raw("layout_04_logo"),
     overlays: [
-      { input: raw("layout_04_overlay"), left: 357, top: 344, width: 286, height: 252 },
+      { input: raw("layout_04_overlay"), left: 343, top: 332, width: 315, height: 277, opacity: 0.5 },
     ],
   }),
   "05": framedLayout({
@@ -108,7 +108,7 @@ export const LAYOUTS = {
     textColor: "#3f9fff",
     logo: raw("layout_05_logo"),
     overlays: [
-      { input: raw("layout_05_overlay"), left: 357, top: 344, width: 286, height: 252 },
+      { input: raw("layout_05_overlay"), left: 343, top: 332, width: 315, height: 277, opacity: 0.5 },
     ],
   }),
   "06": framedLayout({
@@ -118,7 +118,7 @@ export const LAYOUTS = {
     textColor: "#18876e",
     logo: raw("layout_06_logo"),
     overlays: [
-      { input: raw("layout_06_overlay"), left: 357, top: 344, width: 286, height: 252 },
+      { input: raw("layout_06_overlay"), left: 343, top: 332, width: 315, height: 277, opacity: 0.5 },
     ],
   }),
   "07": framedLayout({
@@ -136,7 +136,7 @@ export const LAYOUTS = {
     textColor: "#ffffff",
     logo: raw("layout_08_logo"),
     overlays: [
-      { input: raw("layout_08_overlay"), left: 381, top: 364, width: 239, height: 259 },
+      { input: raw("layout_08_overlay"), left: 369, top: 351, width: 263, height: 285, opacity: 0.5 },
     ],
   }),
   "09": fullBleedLayout({
@@ -146,7 +146,7 @@ export const LAYOUTS = {
     textColor: "#ffffff",
     logo: raw("layout_09_logo"),
     overlays: [
-      { input: raw("layout_09_overlay_custom.svg"), left: 354, top: 339, width: 293, height: 310 },
+      { input: raw("layout_09_overlay_custom.svg"), left: 340, top: 324, width: 322, height: 341, opacity: 0.5 },
     ],
   }),
 };

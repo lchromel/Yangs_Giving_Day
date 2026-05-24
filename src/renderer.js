@@ -226,6 +226,30 @@ async function applyCardMask(buffer) {
     .toBuffer();
 }
 
+async function applyOpacity(buffer, opacity = 1) {
+  if (opacity >= 1) {
+    return buffer;
+  }
+
+  const { width, height } = await sharp(buffer).metadata();
+  const opacityMask = await sharp({
+    create: {
+      width,
+      height,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: opacity },
+    },
+  })
+    .png()
+    .toBuffer();
+
+  return sharp(buffer)
+    .ensureAlpha()
+    .composite([{ input: opacityMask, blend: "dest-in" }])
+    .png()
+    .toBuffer();
+}
+
 export async function renderPostcardBuffer({
   photoPath,
   wish,
@@ -265,9 +289,13 @@ export async function renderPostcardBuffer({
   }
 
   for (const overlay of layout.overlays) {
+    const overlayBuffer = await sharp(overlay.input)
+      .resize(overlay.width, overlay.height)
+      .png()
+      .toBuffer();
     composites.push(
       await placeOnCanvas(
-        await sharp(overlay.input).resize(overlay.width, overlay.height).png().toBuffer(),
+        await applyOpacity(overlayBuffer, overlay.opacity),
         overlay.left,
         overlay.top,
       ),
