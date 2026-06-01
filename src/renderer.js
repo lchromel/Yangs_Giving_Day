@@ -33,6 +33,11 @@ const PREVIEW_LABEL_FONT_DATA_URL = fontDataUrl(PREVIEW_LABEL_FONT_PATH);
 const FONT_FAMILY = "'Yango Group Text', 'Yango Text', 'Yandex Sans Text', 'SF Pro Display', sans-serif";
 const PREVIEW_LABEL_FONT_FAMILY = "'Yango Headline', 'Helvetica Neue', sans-serif";
 const TEXT_MAX_CHARS_PER_LINE = 28;
+const EMOJI_PATTERN = /(?:[\u{1f1e6}-\u{1f1ff}]{2}|\p{Extended_Pictographic}(?:[\ufe0e\ufe0f])?(?:\u200d\p{Extended_Pictographic}(?:[\ufe0e\ufe0f])?)*)/gu;
+const SPACE_WIDTH = 22;
+const EMOJI_ASSET_DIR = path.join(ROOT_DIR, "assets", "emoji");
+const EMOJI_CACHE_DIR = path.join(ROOT_DIR, "tmp", "emoji-cache");
+const TWEMOJI_BASE_URL = "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg";
 
 function fontDataUrl(fontPath) {
   const font = fs.readFileSync(fontPath).toString("base64");
@@ -70,41 +75,179 @@ function wrapText(text) {
   return lines.slice(0, 3);
 }
 
-function buildTextOverlay(text, color, textBox) {
-  const lines = wrapText(text);
-  const centerX = textBox.left + textBox.width / 2;
-  const contentHeight =
-    lines.length * TEXT_FONT_SIZE + Math.max(0, lines.length - 1) * (TEXT_LINE_HEIGHT - TEXT_FONT_SIZE);
-  const firstLineY =
-    textBox.top + Math.round((textBox.height - contentHeight) / 2) + TEXT_FONT_SIZE;
-  const tspan = lines
-    .map((line, index) => {
-      const dy = index === 0 ? 0 : TEXT_LINE_HEIGHT;
-      return `<tspan x="${centerX}" dy="${dy}">${escapeXml(line)}</tspan>`;
-    })
-    .join("");
+function splitEmojiRuns(line) {
+  const runs = [];
+  let lastIndex = 0;
 
-  return Buffer.from(`
-    <svg width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" viewBox="0 0 ${CANVAS_SIZE} ${CANVAS_SIZE}" xmlns="http://www.w3.org/2000/svg">
-      <style>
+  for (const match of line.matchAll(EMOJI_PATTERN)) {
+    if (match.index > lastIndex) {
+      runs.push({ type: "text", value: line.slice(lastIndex, match.index) });
+    }
+    runs.push({ type: "emoji", value: match[0] });
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < line.length) {
+    runs.push({ type: "text", value: line.slice(lastIndex) });
+  }
+
+  return runs;
+}
+
+function emojiAssetKey(value) {
+  return [...value.replaceAll("\ufe0e", "").replaceAll("\ufe0f", "")]
+    .map((char) => char.codePointAt(0).toString(16))
+    .join("-");
+}
+
+async function loadEmojiSvg(value) {
+  const key = emojiAssetKey(value);
+  const assetPath = path.join(EMOJI_ASSET_DIR, `${key}.svg`);
+  const cachePath = path.join(EMOJI_CACHE_DIR, `${key}.svg`);
+
+  try {
+    return await fs.promises.readFile(assetPath);
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      throw error;
+    }
+  }
+
+  try {
+    return await fs.promises.readFile(cachePath);
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      throw error;
+    }
+  }
+
+  const response = await fetch(`${TWEMOJI_BASE_URL}/${key}.svg`);
+  if (!response.ok) {
+    throw new Error(`Cannot load emoji asset ${key}: ${response.status} ${response.statusText}`);
+  }
+
+  const svg = Buffer.from(await response.arrayBuffer());
+  await fs.promises.mkdir(EMOJI_CACHE_DIR, { recursive: true });
+  await fs.promises.writeFile(cachePath, svg);
+  return svg;
+}
+
+async function renderEmojiRun(value) {
+  const svg = await loadEmojiSvg(value);
+  const rendered = await sharp(svg)
+    .resize({ height: TEXT_FONT_SIZE, fit: "inside" })
+    .png()
+    .toBuffer({ resolveWithObject: true });
+  return {
+    input: rendered.data,
+    width: rendered.info.width,
+  };
+}
+
+async function renderTextRun({ value, type, color }) {
+  const leadingSpaces = value.match(/^ */)?.[0].length ?? 0;
+  const trailingSpaces = value.match(/ *$/)?.[0].length ?? 0;
+  const trimmedValue = value.trim();
+  const sideSpaceWidth = (leadingSpaces + trailingSpaces) * SPACE_WIDTH;
+
+  if (!trimmedValue) {
+    return { input: null, width: sideSpaceWidth };
+  }
+
+  if (type === "emoji") {
+    try {
+      const rendered = await renderEmojiRun(trimmedValue);
+      return {
+        input: rendered.input,
+        width: rendered.width + sideSpaceWidth,
+      };
+    } catch (error) {
+      console.warn(error.message);
+      return { input: null, width: TEXT_FONT_SIZE + sideSpaceWidth };
+    }
+  }
+
+  const fontSize = TEXT_FONT_SIZE;
+  const estimatedWidth = Math.max(
+    fontSize,
+    Math.ceil([...trimmedValue].length * fontSize * 0.75),
+  );
+  const svgWidth = estimatedWidth + 32;
+  const svgHeight = Math.max(TEXT_LINE_HEIGHT, fontSize) + 32;
+  const escapedValue = escapeXml(trimmedValue);
+
+  const fontFace = `
         @font-face {
           font-family: 'Yango Group Text';
           src: url('${TEXT_FONT_DATA_URL}') format('truetype');
           font-weight: 400;
           font-style: normal;
         }
+      `;
+
+  const svg = Buffer.from(`
+    <svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">
+      <style>
+        ${fontFace}
 
         text {
           font-family: ${FONT_FAMILY};
-          font-size: ${TEXT_FONT_SIZE}px;
+          font-size: ${fontSize}px;
           font-weight: 400;
           fill: ${color};
-          text-anchor: middle;
         }
       </style>
-      <text x="${centerX}" y="${firstLineY}">${tspan}</text>
+      <text x="16" y="${fontSize + 8}">${escapedValue}</text>
     </svg>
   `);
+
+  const rendered = await sharp(svg).png().trim().toBuffer({ resolveWithObject: true });
+  return {
+    input: rendered.data,
+    width: rendered.info.width + sideSpaceWidth,
+  };
+}
+
+async function buildTextOverlay(text, color, textBox) {
+  const lines = wrapText(text);
+  const centerX = textBox.left + textBox.width / 2;
+  const contentHeight =
+    lines.length * TEXT_FONT_SIZE + Math.max(0, lines.length - 1) * (TEXT_LINE_HEIGHT - TEXT_FONT_SIZE);
+  const firstLineY =
+    textBox.top + Math.round((textBox.height - contentHeight) / 2) + TEXT_FONT_SIZE;
+  const composites = [];
+
+  for (const [lineIndex, line] of lines.entries()) {
+    const runs = await Promise.all(
+      splitEmojiRuns(line).map((run) => renderTextRun({ ...run, color })),
+    );
+    const lineWidth = runs.reduce((sum, run) => sum + run.width, 0);
+    let left = Math.round(centerX - lineWidth / 2);
+    const top = Math.round(firstLineY + lineIndex * TEXT_LINE_HEIGHT - TEXT_FONT_SIZE);
+
+    for (const run of runs) {
+      if (run.input) {
+        composites.push({
+          input: run.input,
+          left,
+          top,
+        });
+      }
+      left += run.width;
+    }
+  }
+
+  return sharp({
+    create: {
+      width: CANVAS_SIZE,
+      height: CANVAS_SIZE,
+      channels: 4,
+      background: "#00000000",
+    },
+  })
+    .composite(composites)
+    .png()
+    .toBuffer();
 }
 
 function buildRoundedMask(size, radius) {
@@ -311,7 +454,7 @@ export async function renderPostcardBuffer({
   );
   composites.push(
     await placeOnCanvas(
-      buildTextOverlay(normalizedWish, layout.textColor, layout.textBox),
+      await buildTextOverlay(normalizedWish, layout.textColor, layout.textBox),
       0,
       0,
     ),

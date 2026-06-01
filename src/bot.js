@@ -128,7 +128,7 @@ async function handleMessage(message) {
     resetSession(chatId);
     await sendMessage(
       chatId,
-      `Send a short wish for the postcard. Limit: ${settings.maxWishLength} characters.`,
+      `Send a short wish for the postcard without emoji. Limit: ${settings.maxWishLength} characters.`,
     );
     return;
   }
